@@ -22,15 +22,15 @@ const singleshotCode = process.argv.slice((evalFlag !== -1 ? evalFlag : printFla
 const validFlags = [
     '-h', '--help', '-e', '--eval', '-p', '--print', '--debug', '--sloppy', '--multiline', '--no-history',
 ] as const;
-if (process.argv.length > 2) {
-    for (const arg of process.argv.slice(2)) {
-        if (['-e', '--eval', '-p', '--print'].includes(arg)) break;
-        if (validFlags.includes(arg as typeof validFlags[0])) continue;
-        console.error(`bun repl: Unknown option "${$.whiteBright+arg+$.red}"`);
-        console.error(`For more information try ${$.whiteBright}--help${$.reset}`);
-        process.exit(0);
-    }
+
+for (const arg of process.argv.slice(2)) {
+    if (['-e', '--eval', '-p', '--print'].includes(arg)) break;
+    if (validFlags.includes(arg as typeof validFlags[0])) continue;
+    console.error(`bun repl: Unknown option "${$.whiteBright+arg+$.red}"`);
+    console.error(`For more information try ${$.whiteBright}--help${$.reset}`);
+    process.exit(0);
 }
+
 
 const { default: repl } = await import('./repl');
 await repl.start(singleshot ? singleshotCode : undefined, printFlag !== -1);
