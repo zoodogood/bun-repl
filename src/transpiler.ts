@@ -25,8 +25,9 @@ export default class Transpiler extends swc.Compiler {
 
     // REPL-specific adjustments needed for the code to work in a REPL context. (Ran before transpile)
     preprocess(code: string): string {
+        const IMPORT_TEMPLATE = /import(?:(?:(?:[ \n\t]+(<?defautVar>[^ *\n\t{},]+)[ \n\t]*(?:,|[ \n\t]+))?(<?destructedVars>[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'{}]+[ \n\t]*,?)+\})?[ \n\t]*)|[ \n\t]*\*[ \n\t]*as[ \n\t]+(<?wildcardVar>[^ \n\t{}]+)[ \n\t]+)from[ \n\t]*(?:['"])(<?moduleIndentifier>[^'"\n]+)(['"])/g;
         return code
-            .replaceAll(/import(?:(?:(?:[ \n\t]+([^ *\n\t{},]+)[ \n\t]*(?:,|[ \n\t]+))?([ \n\t]*\{(?:[ \n\t]*[^ \n\t"'{}]+[ \n\t]*,?)+\})?[ \n\t]*)|[ \n\t]*\*[ \n\t]*as[ \n\t]+([^ \n\t{}]+)[ \n\t]+)from[ \n\t]*(?:['"])([^'"\n]+)(['"])/g,
+            .replaceAll(IMPORT_TEMPLATE,
                 ($0, defaultVar?: string, destructuredVars?: string, wildcardVar?: string, moduleIdentifier: string = '') => {
                     let str = `${$0};/*$replTranspiledImport:`;
                     let info = { moduleIdentifier } as replTranspiledImportInfo;
@@ -48,9 +49,10 @@ export default class Transpiler extends swc.Compiler {
 
     // REPL-specific adjustments needed for the code to work in a REPL context. (Ran after transpile)
     postprocess(code: string): string {
+        const UNDERLINED_REQUIRE_TEMPLATE = /(?:var|let|const) (?<requireVar>_.+?) = require\(?<requireStr>"(?<info>.+?)"\);[ \t\n;]*\/\*\$replTranspiledImport:(?<uuid>{.+?})\*\//g;
         let importsData = [] as ({ requireVar: string, requireStr: string, info: replTranspiledImportInfo, uuid: string })[];
         code = (SLOPPY_MODE ? '' : '"use strict";void 0;\n') + code
-            .replaceAll(/(?:var|let|const) (_.+?) = require\("(.+?)"\);[ \t\n;]*\/\*\$replTranspiledImport:({.+?})\*\//g,
+            .replaceAll(REQUIRE_TEMPLATE,
                 ($0, requireVar: string, requireStr: string, infoStr: string) => {
                     const info = JSON.parse(infoStr) as replTranspiledImportInfo;
                     const uuid = safeUUID();
