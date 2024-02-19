@@ -20,7 +20,7 @@ const singleshot = evalFlag !== -1 || printFlag !== -1;
 const singleshotCode = process.argv.slice((evalFlag !== -1 ? evalFlag : printFlag) + 1).join(' ');
 
 const validFlags = [
-    '-h', '--help', '-e', '--eval', '-p', '--print', '--debug', '--sloppy', '--no-history',
+    '-h', '--help', '-e', '--eval', '-p', '--print', '--debug', '--sloppy', '--multiline', '--no-history',
 ] as const;
 if (process.argv.length > 2) {
     for (const arg of process.argv.slice(2)) {
@@ -43,6 +43,7 @@ Options:
     -p, --print <...>        Evaluates given code, prints result and exits.
     -e, --eval <...>         Evaluates given code and silently exits.
     --sloppy                 Runs the REPL in sloppy mode.
+    --multiline              Runs the REPL in multiline mode
 
 * Options with <...> as argument must be passed last.
 
